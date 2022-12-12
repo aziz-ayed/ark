@@ -1,0 +1,33 @@
+name: ark
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core
+  - python=3.8
+  - pip
+  # Server
+  - coverage<6.0
+  - coverage-badge==1.1.0
+  - flask==2.0.2
+  - Pillow==9.0.0
+  - pydicom==2.2.2
+  - requests==2.27.1
+  - requests-file==1.5.1
+  - tqdm==4.62.3
+  # Model
+  - lifelines==0.26.4
+  - scikit-image==0.18.2
+  - scikit-learn==1.0.1
+  - torchvision==0.10.0
+  - pip:
+      - torch==1.10.1
+      - torchvision==0.11.2
+      - pytorch_lightning==1.5.6
+      - opencv-python==4.5.4.58
+      - albumentations==1.1.0
+
+  - recommonmark
+  - sphinx>=3.2.1
+  - torchio==0.18.74
+  - gdown==4.5.1
