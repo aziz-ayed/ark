@@ -1,6 +1,8 @@
 # ark
 [![coverage](coverage.svg)](https://pypi.org/project/coverage-badge/) (out-of-date)
 
+## General framework for the deployment of RBG group's Deep Learning models in hospitals
+
 To run the docker image:
 
     docker run -p 5000:5000 ark/mirai
