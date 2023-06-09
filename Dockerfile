@@ -1,40 +1,47 @@
-#FROM python:3.8 AS builder
+# Use a Windows base image
+FROM mcr.microsoft.com/windows/server:ltsc2022
 
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    g++ \
-#    wget \
-#    unzip \
-#&& rm -rf /var/lib/apt/lists/*
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-#COPY requirements.txt .
-#RUN pip wheel --no-cache-dir --wheel-dir /wheels/ -r requirements.txt git+https://github.com/pgmikhael/Sybil.git
+# Install system dependencies using Chocolatey
+RUN iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) ; \
+    choco install -y ffmpeg --allow-empty-checksums --allow-downgrade ; \
+    choco install -y vcbuildtools --allow-empty-checksums --allow-downgrade ; \
+    choco install -y python3 --version 3.8.0 --allow-empty-checksums --allow-downgrade ; \
+    choco install -y git --allow-empty-checksums --allow-downgrade ; \
+    choco install -y dcmtk --allow-empty-checksums --allow-downgrade ; \
+    choco install -y wget --allow-empty-checksums --allow-downgrade ; \
+    choco install -y unzip --allow-empty-checksums --allow-downgrade ; \
+    choco install -y curl ; \
+    Remove-Item -Force -Recurse -Path C:\ProgramData\chocolatey
 
-FROM python:3.8-slim
+# Set SSL certificates
 
+RUN curl -o C:\cacert.pem https://curl.se/ca/cacert.pem
+ENV SSL_CERT_FILE=C:\cacert.pem
+
+# Install "Media Foundation" feature
+
+RUN Install-WindowsFeature Server-Media-Foundation
+
+# Set the working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    g++ \
-    wget \
-    unzip \
-    git \
-&& rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6  -y
+# Copy and install Python dependencies
+RUN py -m pip install --upgrade --user pip setuptools wheel
 
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-RUN git clone https://github.com/pgmikhael/Sybil.git && cd Sybil && pip install . && cd ..
+RUN py -m pip install -r requirements.txt
+RUN py -m pip install -U albumentations==1.1.0 --no-binary qudida,albumentations
+RUN py -m pip install --upgrade --no-cache-dir gdown
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    dcmtk \
-    python3-sklearn-lib \
-&& rm -rf /var/lib/apt/lists/*
+# Clone and install Sybil library
+RUN git clone https://github.com/aziz-ayed/win_Sybil.git ;
+    WORKDIR /app/win_Sybil
+RUN py -m pip install . ;
+    WORKDIR /app
 
-#COPY --from=builder /wheels /wheels
-#RUN pip install --no-cache /wheels/* && rm -rf /wheels/
-
+# Copy application code
 COPY . .
 
 ENV NAME ark

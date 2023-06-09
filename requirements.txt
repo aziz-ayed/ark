@@ -21,8 +21,7 @@ scikit-learn==1.0.1
 # Utils
 lifelines==0.26.4
 # Loading
-opencv-python==4.5.4.58
-albumentations==1.1.0
+opencv-contrib-python-headless
 # Logging
 # Comet-ml
 torchio==0.18.74
